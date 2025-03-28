@@ -1,0 +1,69 @@
+name: Terraform CI/CD
+
+# This workflow can be manually triggered with a chosen environment.
+# The available environments are 'dev', 'stage', and 'prod'.
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to run Terraform in ('dev', 'stage', 'prod')"
+        required: true
+        default: "dev"  # Default environment is set to 'dev'
+
+# Set a global environment variable from the workflow input.
+env:
+  environment: ${{ inputs.environment || 'dev' }}
+
+jobs:
+  terraform:
+    # Run the job on the latest Ubuntu runner.
+    runs-on: ubuntu-latest
+    # Specify the environment for this job (can be used for deployment protection rules).
+    environment: ${{ inputs.environment || 'dev' }}
+    # Set the default working directory to the 'infrastructure' folder.
+    defaults:
+      run:
+        working-directory: infrastructure
+
+    steps:
+      # Checkout the repository so Terraform can access your code.
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Set up Terraform with a specified version.
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: '1.9.8'
+
+      # Authenticate to Google Cloud Platform using a service account.
+      # The project ID is taken from repository variables (vars) and the credentials from secrets.
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v1
+        with:
+          project_id: ${{ vars.GCP_PROJECT }}
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      # Initialize Terraform with a backend configuration that is environment-specific.
+      # The backend configuration file (e.g., env/dev.backend.hcl) should exist in the repository.
+      - name: Terraform Init
+        run: terraform init -backend-config="env/${{ env.environment }}.backend.hcl"
+
+      # Run a Terraform plan using an environment-specific variable file (e.g., dev.tfvars).
+      # The plan output is saved to tfplan.out for later use.
+      - name: Terraform Plan
+        run: terraform plan -var-file="${{ env.environment }}.tfvars" -out=tfplan.out
+        continue-on-error: false
+
+      # Upload the Terraform plan output as an artifact for record keeping or review.
+      - name: Save tfplan.out as an artifact
+        id: save-artifact
+        uses: actions/upload-artifact@v4
+        with:
+          # Name the artifact using the pull request number if available.
+          name: ${{ github.event.pull_request.number }}-tf-plan
+          path: infrastructure/tfplan.out
+
+      # Apply the Terraform plan automatically. The -auto-approve flag bypasses interactive approval.
+      - name: Terraform Apply
+        run: terraform apply -input=false -auto-approve tfplan.out

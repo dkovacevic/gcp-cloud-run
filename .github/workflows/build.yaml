@@ -1,0 +1,50 @@
+# Build and Push Docker Image to GCR
+name: Build and Push Docker Image to GCR
+
+# Trigger the workflow on every push to the 'main' branch.
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    # Run the job on the latest Ubuntu runner.
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Check out the repository code.
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Step 2: Set up QEMU for multi-platform image builds.
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      # Step 3: Set up Docker Buildx, a Docker CLI plugin for extended build capabilities.
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Step 4: Authenticate to Google Cloud Platform using the service account credentials.
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v1
+        with:
+          project_id: ${{ vars.GCP_PROJECT }}
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      # Step 5: Configure Docker to use Google Container Registry (GCR) for image storage.
+      - name: Configure Docker for GCR
+        run: gcloud auth configure-docker --quiet
+
+      # Step 6: Build, tag, and push the Docker image to GCR.
+      - name: Build, tag, and push Docker image to GCR
+        env:
+          # Define the GCR repository path using the GCP project ID.
+          GCR_REPOSITORY: gcr.io/${{ vars.GCP_PROJECT }}/hello
+          # Set the Docker image tag.
+          IMAGE_TAG: latest
+        run: |
+          # Build the Docker image with the specified tag.
+          docker build -t $GCR_REPOSITORY:$IMAGE_TAG .
+          # Push the Docker image to GCR.
+          docker push $GCR_REPOSITORY:$IMAGE_TAG
