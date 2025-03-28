@@ -1,6 +1,6 @@
 terraform {
   backend "gcs" {
-    bucket = "app-tf-state-bucket"
+    bucket = "hello-tf-state-bucket"
     prefix = "cloud-run-deployment"
   }
 
