@@ -25,17 +25,17 @@ resource "google_compute_region_target_https_proxy" "https_proxy" {
 
 #############################
 # Create a Forwarding Rule
-# Routes HTTP traffic (port 80) from the reserved IP to the target HTTP proxy.
+# Routes HTTPS traffic (port 443) from the reserved IP to the target HTTPS proxy.
 #############################
 resource "google_compute_forwarding_rule" "http_fr" {
-  name                  = "http-lb-fr"
+  name                  = "https-lb-fr"
   region                = var.region
   load_balancing_scheme = "INTERNAL_MANAGED"  # Specifies internal load balancing.
   # The reserved internal IP address is used as the frontend of the load balancer.
   ip_address            = google_compute_address.internal_lb_address.address  # Input IP.
   # The forwarding rule is associated with a PRIVATE subnetwork.
   subnetwork            = google_compute_subnetwork.private_subnet.self_link
-  port_range            = "80"          # The port on which traffic is accepted (HTTP).
+  port_range            = "443"          # The port on which traffic is accepted (HTTPS).
   # The target is the HTTP proxy that routes traffic to the backend service.
   target                = google_compute_region_target_https_proxy.https_proxy.id  # Output target.
 
