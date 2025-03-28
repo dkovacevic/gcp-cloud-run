@@ -15,11 +15,12 @@ resource "google_compute_region_url_map" "lb_url_map" {
   default_service = google_compute_region_backend_service.backend_service.self_link
 }
 
-# This resource creates a target HTTP proxy which uses the URL map for routing traffic.
-resource "google_compute_region_target_http_proxy" "http_proxy" {
-  name    = "internal-lb-http-proxy"
-  region  = var.region
-  url_map = google_compute_region_url_map.lb_url_map.self_link
+# Create a target HTTPS proxy which uses the URL map and the SSL certificate for routing traffic.
+resource "google_compute_region_target_https_proxy" "https_proxy" {
+  name             = "internal-lb-https-proxy"
+  region           = var.region
+  url_map          = google_compute_region_url_map.lb_url_map.self_link
+  ssl_certificates = [google_compute_region_ssl_certificate.lb_ssl_certificate.self_link]
 }
 
 #############################
@@ -36,7 +37,15 @@ resource "google_compute_forwarding_rule" "http_fr" {
   subnetwork            = google_compute_subnetwork.private_subnet.self_link
   port_range            = "80"          # The port on which traffic is accepted (HTTP).
   # The target is the HTTP proxy that routes traffic to the backend service.
-  target                = google_compute_region_target_http_proxy.http_proxy.id  # Output target.
+  target                = google_compute_region_target_https_proxy.https_proxy.id  # Output target.
 
   depends_on = [google_compute_subnetwork.proxy_subnet]
+}
+
+# Create an SSL certificate for HTTPS termination.
+resource "google_compute_region_ssl_certificate" "lb_ssl_certificate" {
+  name        = "internal-lb-ssl"
+  region      = var.region
+  private_key = file("selfsigned.key")
+  certificate = file("selfsigned.crt")
 }
