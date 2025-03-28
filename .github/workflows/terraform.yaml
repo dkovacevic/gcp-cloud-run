@@ -16,6 +16,7 @@ env:
 
 jobs:
   terraform:
+
     # Run the job on the latest Ubuntu runner.
     runs-on: ubuntu-latest
     # Specify the environment for this job (can be used for deployment protection rules).
@@ -52,6 +53,9 @@ jobs:
       # Run a Terraform plan using an environment-specific variable file (e.g., dev.tfvars).
       # The plan output is saved to tfplan.out for later use.
       - name: Terraform Plan
+        env:
+          TF_VAR_project_id: ${{ vars.GCP_PROJECT }}
+
         run: terraform plan -var-file="${{ env.environment }}.tfvars" -out=tfplan.out
         continue-on-error: false
 
