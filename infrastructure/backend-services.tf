@@ -31,4 +31,11 @@ resource "google_compute_region_backend_service" "backend_service" {
     # Reference the serverless NEG's unique ID.
     group = google_compute_region_network_endpoint_group.serverless_neg.id
   }
+
+  # IAP configuration block.
+  iap {
+    enabled              = true
+    oauth2_client_id     = var.iap_client_id
+    oauth2_client_secret = var.iap_client_secret
+  }
 }

@@ -66,3 +66,17 @@ variable "vpc_access_connector_min_throughput" {
   type        = number
   default     = 200
 }
+
+# Variables for IAP credentials.
+variable "iap_client_id" {
+  description = "OAuth2 Client ID for IAP"
+  type        = string
+  default     = "test"
+}
+
+variable "iap_client_secret" {
+  description = "OAuth2 Client Secret for IAP"
+  type        = string
+  sensitive   = true
+  default     = "test"
+}
