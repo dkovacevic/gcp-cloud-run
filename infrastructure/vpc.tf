@@ -1,16 +1,16 @@
 # Create a VPC Access Connector that allows Cloud Run services to connect to the VPC network.
-resource "google_vpc_access_connector" "connector" {
-  name = "vpc-connector"  # Name of the VPC access connector.
-
-  # Define the subnet for the connector. This references the internal subnetwork created below.
-  subnet {
-    name = google_compute_subnetwork.connector_subnet.name
-  }
-
-  region         = var.region  # The region where the connector is deployed.
-  max_throughput = var.vpc_access_connector_max_throughput  # Maximum throughput capacity in Mbps.
-  min_throughput = var.vpc_access_connector_min_throughput  # Minimum throughput capacity in Mbps.
-}
+#resource "google_vpc_access_connector" "connector" {
+#  name = "vpc-connector"  # Name of the VPC access connector.
+#
+#  # Define the subnet for the connector. This references the internal subnetwork created below.
+#  subnet {
+#    name = google_compute_subnetwork.connector_subnet.name
+#  }
+#
+#  region         = var.region  # The region where the connector is deployed.
+#  max_throughput = var.vpc_access_connector_max_throughput  # Maximum throughput capacity in Mbps.
+#  min_throughput = var.vpc_access_connector_min_throughput  # Minimum throughput capacity in Mbps.
+#}
 
 ## Create a reserved proxy-only subnetwork for the load balancer. For the Frontend
 resource "google_compute_subnetwork" "proxy_subnet" {
@@ -34,14 +34,14 @@ resource "google_compute_subnetwork" "private_subnet" {
   purpose = "PRIVATE"
 }
 
-resource "google_compute_subnetwork" "connector_subnet" {
-  name          = "connector-subnet"
-  ip_cidr_range = "10.0.2.0/28"
-  region        = var.region
-  network       = google_compute_network.internal_net.id
-
-  purpose = "PRIVATE"
-}
+#resource "google_compute_subnetwork" "connector_subnet" {
+#  name          = "connector-subnet"
+#  ip_cidr_range = "10.0.2.0/28"
+#  region        = var.region
+#  network       = google_compute_network.internal_net.id
+#
+#  purpose = "PRIVATE"
+#}
 
 # Define a custom VPC network
 resource "google_compute_network" "internal_net" {
