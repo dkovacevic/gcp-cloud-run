@@ -34,6 +34,7 @@ This Terraform-based IaC solution deploys a Cloud Run web application using an i
 ```
 ├── infrastructure/             # Contains Terraform configuration files
 │   ├── cloud-run.tf            # Cloud Run service
+│   ├── dns.tf                  # DNS zone & DNS record set
 │   ├── vpc.tf                  # VPC, subnetwork, and related network resources
 │   ├── backend-services.tf     # NEG, backend service, etc.
 |   ├── load-balancer.tf        # Internal IP, URL map, Proxy, Forwarding rules

@@ -48,10 +48,12 @@ resource "google_cloud_run_v2_service" "web_app" {
 
     # VPC Access configuration enables the service to connect to a VPC for controlling egress traffic.
     vpc_access {
-      # Use the self_link of a previously created VPC Access Connector.
-      connector = google_vpc_access_connector.connector.self_link
+      network_interfaces {
+        network    = google_compute_network.internal_net.name
+        subnetwork = google_compute_subnetwork.private_subnet.name
+      }
       # Specify that all outbound traffic should be routed through the VPC connector.
-      egress    = "ALL_TRAFFIC"
+      egress = "ALL_TRAFFIC"
     }
   }
 }

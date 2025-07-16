@@ -14,6 +14,12 @@ resource "google_dns_managed_zone" "internal" {
   }
 }
 
+resource "google_certificate_manager_dns_authorization" "default" {
+  domain = "internal.example.com"
+  name   = "internal-example-com-dnsauth"
+  location = var.region
+}
+
 # Create an A record for the internal load balancer
 resource "google_dns_record_set" "internal_lb" {
   name         = "internal.example.com."
