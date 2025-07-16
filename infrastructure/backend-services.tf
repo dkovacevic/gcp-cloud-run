@@ -20,7 +20,7 @@ resource "google_compute_region_network_endpoint_group" "serverless_neg" {
 resource "google_compute_region_backend_service" "backend_service" {
   name                  = "cloud-run-backend"
   region                = var.region
-  protocol              = "HTTP"
+  protocol              = "HTTPS"
   # Specify that this backend service uses an internal managed load balancing scheme.
   load_balancing_scheme = "INTERNAL_MANAGED"
 
